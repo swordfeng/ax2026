@@ -105,8 +105,11 @@ window.AX_EVENTS = [
     "endDayOffset": 0,
     "description": "Game creator Fuyuki Hayashi and illustrator & animator odyk join for a special panel. Featuring a live drawing demonstration, the session explores the works’ core concepts, development process, and unique visual direction, alongside the creative philosophy behind their distinctive worlds.",
     "clearing": "",
-    "workTitle": "",
-    "workTitles": [],
+    "workTitle": "Yunyun Syndrome!? Rhythm Psychosis",
+    "workTitles": [
+      "Yunyun Syndrome!? Rhythm Psychosis",
+      "Drunken Goddess Reflux"
+    ],
     "tags": []
   },
   {
@@ -148,8 +151,10 @@ window.AX_EVENTS = [
     "endDayOffset": 0,
     "description": "Join Harmony Gold U.S.A. as we celebrate Robotech into its fourth decade of growth. Get the latest news and updates on our new toy lines, comics, board and role playing games, and the reveal of our new video game from JOYCITY! (Yes, you read right)",
     "clearing": "",
-    "workTitle": "",
-    "workTitles": [],
+    "workTitle": "Robotech",
+    "workTitles": [
+      "Robotech"
+    ],
     "tags": [
       {
         "id": "game",
@@ -1152,8 +1157,10 @@ window.AX_EVENTS = [
     "endDayOffset": 0,
     "description": "Join us as we go over upcoming product releases and new information for Bushiroad in 2026! Featuring \"Palworld OFFICIAL CARD GAME\", \"Cardfight!! Vanguard\", \"Weiß Schwarz\" and more! Let's Bushiroad!",
     "clearing": "",
-    "workTitle": "",
-    "workTitles": [],
+    "workTitle": "Bushiroad",
+    "workTitles": [
+      "Bushiroad"
+    ],
     "tags": []
   },
   {
@@ -1796,7 +1803,12 @@ window.AX_EVENTS = [
     "clearing": "",
     "workTitle": "",
     "workTitles": [],
-    "tags": []
+    "tags": [
+      {
+        "id": "live",
+        "label": "Live表演"
+      }
+    ]
   },
   {
     "id": "ax26-90",
@@ -4059,9 +4071,9 @@ window.AX_EVENTS = [
     "endDayOffset": 0,
     "description": "Get ready for Cyberpunk: Edgerunners 2! This brand-new, standalone story will show an even more brutal, raw, and painfully human side of Night City, so join us live to hear directly from voice actors and creators of the series, and brace yourself for what’s to come. ***This room WILL be cleared prior to this panel.***",
     "clearing": "入场前清场",
-    "workTitle": "Cyberpunk: Edgerunners",
+    "workTitle": "Cyberpunk: Edgerunners 2",
     "workTitles": [
-      "Cyberpunk: Edgerunners"
+      "Cyberpunk: Edgerunners 2"
     ],
     "tags": []
   },
@@ -4758,7 +4770,12 @@ window.AX_EVENTS = [
     "workTitles": [
       "BLEACH: Thousand-Year Blood War"
     ],
-    "tags": []
+    "tags": [
+      {
+        "id": "jp_va",
+        "label": "声优"
+      }
+    ]
   },
   {
     "id": "ax26-240",
@@ -5034,8 +5051,10 @@ window.AX_EVENTS = [
     "endDayOffset": 0,
     "description": "Touzan Taiko, founded in 2009 at Cal Poly Pomona is a student-run taiko drumming group dedicated to sharing Japanese cultural music through dynamic performance, exciting collaboration, and community events while training new generations of collegiate taiko players.",
     "clearing": "",
-    "workTitle": "",
-    "workTitles": [],
+    "workTitle": "zan",
+    "workTitles": [
+      "zan"
+    ],
     "tags": [
       {
         "id": "live",
@@ -5187,7 +5206,12 @@ window.AX_EVENTS = [
     "workTitles": [
       "Mob Psycho 100"
     ],
-    "tags": []
+    "tags": [
+      {
+        "id": "jp_va",
+        "label": "声优"
+      }
+    ]
   },
   {
     "id": "ax26-261",
@@ -5328,6 +5352,10 @@ window.AX_EVENTS = [
     ],
     "tags": [
       {
+        "id": "jp_va",
+        "label": "声优"
+      },
+      {
         "id": "premiere",
         "label": "首映/先行"
       }
@@ -5347,8 +5375,10 @@ window.AX_EVENTS = [
     "endDayOffset": 0,
     "description": "Experience the World Premiere of ”From Old Country Bumpkin to Master Swordsman” S2 with Director Akio Kazumi! Plus big reveals for \"Suikoden: The Anime,\" \"A Certain Dark Item,\" \"Mission: Yozakura Family\" S2, and score exclusive limited-edition giveaways!",
     "clearing": "",
-    "workTitle": "",
-    "workTitles": [],
+    "workTitle": "From Old Country Bumpkin to Master Swordsman",
+    "workTitles": [
+      "From Old Country Bumpkin to Master Swordsman"
+    ],
     "tags": [
       {
         "id": "premiere",
@@ -5370,8 +5400,10 @@ window.AX_EVENTS = [
     "endDayOffset": 0,
     "description": "Experience the dynamic sound of Touzan Taiko, Cal Poly Pomona’s Japanese drumming group, as they present a live performance followed by an introductory taiko workshop! Through powerful rhythms, synchronized movement, and spirited performance, Touzan Taiko showcases the energy, discipline, and sense of community at the heart of taiko drumming.",
     "clearing": "",
-    "workTitle": "",
-    "workTitles": [],
+    "workTitle": "zan",
+    "workTitles": [
+      "zan"
+    ],
     "tags": []
   },
   {
@@ -5475,6 +5507,10 @@ window.AX_EVENTS = [
       "NEEDY GIRL OVERDOSE"
     ],
     "tags": [
+      {
+        "id": "jp_va",
+        "label": "声优"
+      },
       {
         "id": "game",
         "label": "游戏"
@@ -5826,7 +5862,12 @@ window.AX_EVENTS = [
     "clearing": "",
     "workTitle": "",
     "workTitles": [],
-    "tags": []
+    "tags": [
+      {
+        "id": "live",
+        "label": "Live表演"
+      }
+    ]
   },
   {
     "id": "ax26-291",
@@ -6060,12 +6101,12 @@ window.AX_EVENTS = [
     ],
     "tags": [
       {
-        "id": "game",
-        "label": "游戏"
-      },
-      {
         "id": "jp_va",
         "label": "声优"
+      },
+      {
+        "id": "game",
+        "label": "游戏"
       }
     ]
   },
@@ -6083,14 +6124,11 @@ window.AX_EVENTS = [
     "endDayOffset": 0,
     "description": "Acky Bright returns to Anime Expo! Known for his McDonald’s campaign, plus collaborations with DC, Marvel, and Red Bull, and his MLB Players–backed IP, GalaXic Baseball Leagure. Enjoy laughs with a comedian MC and score limited giveaways—don’t miss it!",
     "clearing": "",
-    "workTitle": "",
-    "workTitles": [],
-    "tags": [
-      {
-        "id": "weak",
-        "label": "弱关联"
-      }
-    ]
+    "workTitle": "Galaxic Baseball League",
+    "workTitles": [
+      "Galaxic Baseball League"
+    ],
+    "tags": []
   },
   {
     "id": "ax26-304",
@@ -6126,8 +6164,10 @@ window.AX_EVENTS = [
     "endDayOffset": 0,
     "description": "Pitch a tent with HIDIVE for this simulcast premiere where being isekai’d meets gourmet, campfire cooking! Plus, savor a Q&A with special guest director Atsushi Nigorikawa!",
     "clearing": "",
-    "workTitle": "",
-    "workTitles": [],
+    "workTitle": "The Forsaken Saintess and Her Foodie Road Trip in Another World",
+    "workTitles": [
+      "The Forsaken Saintess and Her Foodie Road Trip in Another World"
+    ],
     "tags": [
       {
         "id": "premiere",
@@ -6194,7 +6234,12 @@ window.AX_EVENTS = [
     "clearing": "",
     "workTitle": "",
     "workTitles": [],
-    "tags": []
+    "tags": [
+      {
+        "id": "jp_va",
+        "label": "声优"
+      }
+    ]
   },
   {
     "id": "ax26-309",
@@ -7300,7 +7345,12 @@ window.AX_EVENTS = [
     "workTitles": [
       "JUJUTSU KAISEN"
     ],
-    "tags": []
+    "tags": [
+      {
+        "id": "jp_va",
+        "label": "声优"
+      }
+    ]
   },
   {
     "id": "ax26-365",
