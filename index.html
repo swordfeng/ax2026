@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AX 2026 Schedule Timeline</title>
+    <link rel="stylesheet" href="src/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Anime Expo 2026</p>
+        <h1>日程时间轴</h1>
+      </div>
+      <a class="source-link" href="https://www.anime-expo.org/ax/schedule-2026/">源页面</a>
+    </header>
+
+    <main>
+      <section class="controls" aria-label="日程控制">
+        <div class="tabs" id="dayTabs"></div>
+        <label class="search">
+          <span>搜索</span>
+          <input id="searchInput" type="search" placeholder="作品、活动、房间、描述">
+        </label>
+        <div class="filters" id="tagFilters"></div>
+      </section>
+
+      <section class="summary" id="summary"></section>
+      <section class="timeline-shell" aria-label="竖轴时间横轴地点日程">
+        <div class="timeline" id="timeline"></div>
+      </section>
+    </main>
+
+    <dialog id="eventDialog">
+      <button class="close-button" id="closeDialog" aria-label="关闭">×</button>
+      <div id="dialogBody"></div>
+    </dialog>
+
+    <script src="data/events.js"></script>
+    <script src="src/app.js"></script>
+  </body>
+</html>
