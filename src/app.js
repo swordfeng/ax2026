@@ -3,6 +3,9 @@ const state = {
   day: "",
   query: "",
   tags: new Set(),
+  marked: new Set(loadMarkedIds()),
+  markOnly: false,
+  dialogEventId: "",
 };
 
 const tagLabels = [
@@ -112,9 +115,28 @@ const timeline = document.querySelector("#timeline");
 const dialog = document.querySelector("#eventDialog");
 const dialogBody = document.querySelector("#dialogBody");
 const closeDialog = document.querySelector("#closeDialog");
+const markedStorageKey = "ax2026-marked-events";
 
 const days = [...new Set(events.map((event) => event.date))];
 state.day = days[0] || "";
+
+function loadMarkedIds() {
+  try {
+    const saved = window.localStorage.getItem("ax2026-marked-events");
+    const ids = JSON.parse(saved || "[]");
+    return Array.isArray(ids) ? ids : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveMarkedIds() {
+  try {
+    window.localStorage.setItem(markedStorageKey, JSON.stringify([...state.marked]));
+  } catch {
+    // Ignore storage failures and keep the UI usable.
+  }
+}
 
 function escapeHtml(value) {
   return String(value)
@@ -129,7 +151,8 @@ function eventMatches(event) {
   const text = `${event.title} ${event.room} ${event.description} ${event.clearing}`.toLowerCase();
   const hasQuery = !query || text.includes(query);
   const hasTags = !state.tags.size || [...state.tags].every((tag) => event.tags.some((item) => item.id === tag));
-  return event.date === state.day && hasQuery && hasTags;
+  const hasMark = !state.markOnly || state.marked.has(event.id);
+  return event.date === state.day && hasQuery && hasTags && hasMark;
 }
 
 function minuteLabel(minutes) {
@@ -199,23 +222,46 @@ function annotateJapaneseGuestNames(text) {
   return html;
 }
 
+function isMarked(eventId) {
+  return state.marked.has(eventId);
+}
+
+function markButton(eventId, compact = false) {
+  const marked = isMarked(eventId);
+  const label = marked ? "取消标记" : "标记活动";
+  const icon = marked ? "&#9733;" : "&#9734;";
+  const text = compact ? "" : `<span>${marked ? "已标记" : "标记"}</span>`;
+  return `<button class="mark-toggle${marked ? " marked" : ""}${compact ? " compact" : ""}" type="button" data-mark-toggle="${eventId}" aria-label="${label}" title="${label}">${icon}${text}</button>`;
+}
+
+function toggleMarked(eventId) {
+  if (state.marked.has(eventId)) state.marked.delete(eventId);
+  else state.marked.add(eventId);
+  saveMarkedIds();
+}
+
 function renderControls() {
   dayTabs.innerHTML = days.map((day) => (
     `<button class="${day === state.day ? "active" : ""}" data-day="${escapeHtml(day)}">${escapeHtml(day.replace(", 2026", ""))}</button>`
   )).join("");
 
-  tagFilters.innerHTML = tagLabels.map(([id, label]) => (
+  tagFilters.innerHTML = [
+    `<button class="${state.markOnly ? "active" : ""}" data-filter="marked">已标记</button>`,
+    ...tagLabels.map(([id, label]) => (
     `<button class="${state.tags.has(id) ? "active" : ""}" data-tag="${id}">${label}</button>`
-  )).join("");
+    )),
+  ].join("");
 }
 
 function renderSummary(dayEvents, filteredEvents, rooms) {
   const clearingCount = filteredEvents.filter((event) => event.clearing).length;
+  const markedCount = dayEvents.filter((event) => state.marked.has(event.id)).length;
   summary.innerHTML = [
     `${state.day}`,
     `${filteredEvents.length} / ${dayEvents.length} 个活动`,
     `${rooms.length} 个地点`,
     `${clearingCount} 个活动含清场说明`,
+    `${markedCount} 个已标记`,
     `数据来源：AX 官网缓存`,
   ].map((item) => `<span>${escapeHtml(item)}</span>`).join("");
 }
@@ -278,11 +324,12 @@ function renderTimeline() {
         const classTags = eventColorClass(event);
         const timeText = `${eventTimeLabel(event.start, event.startDayOffset)} - ${eventTimeLabel(event.end, event.endDayOffset)}`;
         return `
-          <button class="event-card ${classTags}" data-id="${event.id}" style="top:${top}px;height:${height}px">
+          <div class="event-card ${classTags}" data-id="${event.id}" role="button" tabindex="0" aria-label="${escapeHtml(timeText)} ${escapeHtml(event.title)}" style="top:${top}px;height:${height}px">
+            ${markButton(event.id, true)}
             <div class="event-time">${escapeHtml(timeText)}</div>
             <div class="event-title">${highlightWorkTitles(event.title, event.workTitles || (event.workTitle ? [event.workTitle] : []))}</div>
             <div class="badges">${eventBadges(event)}</div>
-          </button>`;
+          </div>`;
       }).join("");
     return `<div class="lane" style="grid-column:${index + 2}">${cards}</div>`;
   });
@@ -294,8 +341,12 @@ function renderTimeline() {
 function showEvent(id) {
   const event = events.find((item) => item.id === id);
   if (!event) return;
+  state.dialogEventId = id;
   dialogBody.innerHTML = `
-    <h2 class="dialog-title">${highlightWorkTitles(event.title, event.workTitles || (event.workTitle ? [event.workTitle] : []))}</h2>
+    <div class="dialog-heading">
+      <h2 class="dialog-title">${highlightWorkTitles(event.title, event.workTitles || (event.workTitle ? [event.workTitle] : []))}</h2>
+      ${markButton(event.id)}
+    </div>
     <div class="dialog-meta">
       <span class="badge">${escapeHtml(event.date)}</span>
       <span class="badge">${escapeHtml(eventTimeLabel(event.start, event.startDayOffset))} - ${escapeHtml(eventTimeLabel(event.end, event.endDayOffset))}</span>
@@ -315,6 +366,12 @@ dayTabs.addEventListener("click", (event) => {
 });
 
 tagFilters.addEventListener("click", (event) => {
+  const filterButton = event.target.closest("button[data-filter]");
+  if (filterButton) {
+    state.markOnly = !state.markOnly;
+    renderTimeline();
+    return;
+  }
   const button = event.target.closest("button[data-tag]");
   if (!button) return;
   const tag = button.dataset.tag;
@@ -329,10 +386,38 @@ searchInput.addEventListener("input", () => {
 });
 
 timeline.addEventListener("click", (event) => {
+  const mark = event.target.closest(".mark-toggle");
+  if (mark) {
+    toggleMarked(mark.dataset.markToggle);
+    renderTimeline();
+    return;
+  }
   const button = event.target.closest(".event-card");
   if (!button) return;
   showEvent(button.dataset.id);
 });
 
-closeDialog.addEventListener("click", () => dialog.close());
+timeline.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter" && event.key !== " ") return;
+  const card = event.target.closest(".event-card");
+  if (!card) return;
+  event.preventDefault();
+  showEvent(card.dataset.id);
+});
+
+dialogBody.addEventListener("click", (event) => {
+  const mark = event.target.closest(".mark-toggle");
+  if (!mark) return;
+  toggleMarked(mark.dataset.markToggle);
+  renderTimeline();
+  showEvent(mark.dataset.markToggle);
+});
+
+closeDialog.addEventListener("click", () => {
+  state.dialogEventId = "";
+  dialog.close();
+});
+dialog.addEventListener("close", () => {
+  state.dialogEventId = "";
+});
 renderTimeline();

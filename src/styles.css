@@ -256,10 +256,16 @@ button.active {
   border: 1px solid rgba(31, 35, 40, 0.12);
   border-left: 5px solid var(--accent-2);
   border-radius: 8px;
-  padding: 7px 8px;
+  padding: 7px 8px 7px 10px;
   background: #ffffff;
   box-shadow: 0 6px 18px rgba(31, 35, 40, 0.10);
   text-align: left;
+}
+
+.event-card .event-time,
+.event-card .event-title,
+.event-card .badges {
+  padding-right: 28px;
 }
 
 .event-card.tone-live {
@@ -313,6 +319,43 @@ button.active {
   margin-top: 5px;
 }
 
+.mark-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  border-radius: 8px;
+  padding: 0 10px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.mark-toggle.marked {
+  border-color: #f59e0b;
+  background: #f59e0b;
+  color: white;
+}
+
+.mark-toggle.compact {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  min-width: 22px;
+  min-height: 22px;
+  border-radius: 999px;
+  padding: 0;
+  justify-content: center;
+  background: rgba(255, 247, 237, 0.95);
+  font-size: 12px;
+}
+
+.event-card .mark-toggle.compact {
+  box-shadow: none;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -352,8 +395,16 @@ dialog::backdrop {
 }
 
 .dialog-title {
-  margin: 0 40px 8px 0;
+  margin: 0;
   font-size: 22px;
+}
+
+.dialog-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 40px 8px 0;
 }
 
 .dialog-meta {
