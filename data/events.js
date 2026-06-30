@@ -6148,7 +6148,12 @@ window.AX_EVENTS = [
     "workTitles": [
       "MARRIAGETOXIN"
     ],
-    "tags": []
+    "tags": [
+      {
+        "id": "jp_va",
+        "label": "声优"
+      }
+    ]
   },
   {
     "id": "ax26-305",

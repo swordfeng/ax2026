@@ -14,6 +14,69 @@ const tagLabels = [
 ];
 
 const colorPriority = ["live", "jp_va", "premiere", "game", "weak"];
+const japaneseGuestNames = new Map([
+  ["Acky Bright", "アッキー・ブライト"],
+  ["Aoi Ichikawa", "市川蒼"],
+  ["Anna Nagase", "永瀬アンナ"],
+  ["Ayako Kawasumi", "川澄綾子"],
+  ["Daiki Yamashita", "山下大輝"],
+  ["Daisuke Hirose", "広瀬大介"],
+  ["Gakuto Kajiwara", "梶原岳人"],
+  ["Kamome Shirahama", "白浜鴎"],
+  ["Kana Ueda", "植田佳奈"],
+  ["Kensho Ono", "小野賢章"],
+  ["Kikunosuke Toya", "戸谷菊之介"],
+  ["Koki Uchiyama", "内山昂輝"],
+  ["Machico", "マチコ"],
+  ["Makoto Furukawa", "古川慎"],
+  ["Masakazu Morita", "森田成一"],
+  ["Masaya Fukunishi", "福西勝也"],
+  ["Megumi Toyoguchi", "豊口めぐみ"],
+  ["Miho Okasaki", "岡咲美保"],
+  ["Naoko Yamada", "山田尚子"],
+  ["Natsuki Hanae", "花江夏樹"],
+  ["Norihiro Naganuma", "長沼範裕"],
+  ["Rena Motomura", "本村玲奈"],
+  ["Rie Takahashi", "高橋李依"],
+  ["Saori Hayami", "早見沙織"],
+  ["Sayumi Suzushiro", "鈴代紗弓"],
+  ["Setsu Ito", "伊藤節生"],
+  ["Tadatoshi Fujimaki", "藤巻忠俊"],
+  ["Takahiro Sakurai", "櫻井孝宏"],
+  ["Takushi Koide", "小出卓史"],
+  ["Yoshino Aoyama", "青山吉能"],
+  ["Yuki Shin", "新祐樹"],
+  ["Yume Miyamoto", "宮本侑芽"],
+  ["Yuriyan Retriever", "ゆりやんレトリィバァ"],
+  ["Yuu Hayashi", "林勇"],
+  ["Yuzuru Tachikawa", "立川譲"],
+  ["Atsushi Nigorikawa", "濁川敦"],
+  ["Fumihiko Suganuma", "菅沼芙実彦"],
+  ["Aoi Yuki", "悠木碧"],
+  ["Takeo Otsuka", "大塚剛央"],
+  ["Aya Yamane", "山根綺"],
+  ["Tatsuki Fujimoto", "藤本タツキ"],
+  ["Yugo Kanno", "菅野祐悟"],
+  ["Moriyasu Taniguchi", "谷口守泰"],
+  ["Ryosuke Takahashi", "高橋良輔"],
+  ["Toru Yoshida", "吉田徹"],
+  ["Keiichiro Saito", "斎藤圭一郎"],
+  ["Yuichiro Fukushi", "福士裕一郎"],
+  ["Tatsuya Ishihara", "石原立也"],
+  ["Mitsuhisa Ishikawa", "石川光久"],
+  ["George Wada", "和田丈嗣"],
+  ["Kenji Kamiyama", "神山健治"],
+  ["Tetsuro Araki", "荒木哲郎"],
+  ["Shunsuke Tada", "多田俊介"],
+  ["Hiromu Arakawa", "荒川弘"],
+  ["Gege Akutami", "芥見下々"],
+  ["Nobuo Uematsu", "植松伸夫"],
+  ["Yoko Kanno", "菅野よう子"],
+  ["Yoko Takahashi", "高橋洋子"],
+  ["Mamoru Hosoda", "細田守"],
+  ["Masaaki Yuasa", "湯浅政明"],
+  ["Takanori Aki", "安藝貴範"],
+]);
 
 const venueOrder = [
   "Crypto.com Arena",
@@ -106,6 +169,33 @@ function highlightWorkTitles(title, workTitles = []) {
     cursor = match.end;
   }
   html += escapeHtml(title.slice(cursor));
+  return html;
+}
+
+function annotateJapaneseGuestNames(text) {
+  const matches = [];
+  for (const [name, japanese] of japaneseGuestNames) {
+    let start = text.indexOf(name);
+    while (start !== -1) {
+      const end = start + name.length;
+      if (!matches.some((match) => start < match.end && end > match.start)) {
+        matches.push({ start, end, japanese });
+      }
+      start = text.indexOf(name, end);
+    }
+  }
+
+  if (!matches.length) return escapeHtml(text);
+
+  matches.sort((a, b) => a.start - b.start || (b.end - b.start) - (a.end - a.start));
+  let cursor = 0;
+  let html = "";
+  for (const match of matches) {
+    html += escapeHtml(text.slice(cursor, match.start));
+    html += `<span class="guest-name">${escapeHtml(text.slice(match.start, match.end))}<span class="name-jp">（${escapeHtml(match.japanese)}）</span></span>`;
+    cursor = match.end;
+  }
+  html += escapeHtml(text.slice(cursor));
   return html;
 }
 
@@ -212,7 +302,7 @@ function showEvent(id) {
       <span class="badge">${escapeHtml(event.room)}</span>
       ${eventBadges(event)}
     </div>
-    <p class="dialog-description">${escapeHtml(event.description)}</p>
+    <p class="dialog-description">${annotateJapaneseGuestNames(event.description)}</p>
   `;
   dialog.showModal();
 }

@@ -368,6 +368,15 @@ dialog::backdrop {
   line-height: 1.55;
 }
 
+.guest-name {
+  font-weight: 700;
+}
+
+.name-jp {
+  color: var(--muted);
+  font-weight: 600;
+}
+
 @media (max-width: 760px) {
   .topbar {
     align-items: flex-start;
