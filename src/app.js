@@ -106,6 +106,7 @@ const japaneseVoiceActors = new Map([
   ["Natsuki Hanae", "花江夏樹"],
   ["Rena Motomura", "本村玲奈"],
   ["Rie Takahashi", "高橋李依"],
+  ["Sally Amaki", "天城サリー"],
   ["Saori Hayami", "早見沙織"],
   ["Setsu Ito", "伊藤節生"],
   ["Takahiro Sakurai", "櫻井孝宏"],
@@ -124,6 +125,9 @@ const inferredVoiceActorsByEvent = new Map([
   ]],
   ["MARRIAGETOXIN Road to the Best Marriage! at Anime Expo", [
     "Anna Nagase",
+  ]],
+  ["NEEDY GIRL OVERDOSE IRL Event", [
+    "Sally Amaki",
   ]],
 ]);
 
