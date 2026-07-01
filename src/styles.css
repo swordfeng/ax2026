@@ -477,6 +477,29 @@ dialog::backdrop {
   line-height: 1.55;
 }
 
+.inferred-guests {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin: 12px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: #344054;
+  font-size: 12px;
+}
+
+.inferred-guests strong,
+.inferred-guests span {
+  border-radius: 6px;
+  padding: 3px 6px;
+  background: #f8fafc;
+}
+
+.inferred-guests strong {
+  color: var(--weak);
+}
+
 .guest-name {
   font-weight: 700;
 }

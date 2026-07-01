@@ -27,6 +27,7 @@ const japaneseGuestNames = new Map([
   ["Daiki Yamashita", "山下大輝"],
   ["Daisuke Hirose", "広瀬大介"],
   ["Gakuto Kajiwara", "梶原岳人"],
+  ["Hana Hishikawa", "菱川花菜"],
   ["Kamome Shirahama", "白浜鴎"],
   ["Kana Ueda", "植田佳奈"],
   ["Kensho Ono", "小野賢章"],
@@ -81,6 +82,49 @@ const japaneseGuestNames = new Map([
   ["Mamoru Hosoda", "細田守"],
   ["Masaaki Yuasa", "湯浅政明"],
   ["Takanori Aki", "安藝貴範"],
+]);
+
+const japaneseVoiceActors = new Map([
+  ["Aoi Ichikawa", "市川蒼"],
+  ["Anna Nagase", "永瀬アンナ"],
+  ["Aya Yamane", "山根綺"],
+  ["Ayako Kawasumi", "川澄綾子"],
+  ["Daiki Yamashita", "山下大輝"],
+  ["Daisuke Hirose", "広瀬大介"],
+  ["Gakuto Kajiwara", "梶原岳人"],
+  ["Hana Hishikawa", "菱川花菜"],
+  ["Kana Ueda", "植田佳奈"],
+  ["Kensho Ono", "小野賢章"],
+  ["Kikunosuke Toya", "戸谷菊之介"],
+  ["Koki Uchiyama", "内山昂輝"],
+  ["Machico", "マチコ"],
+  ["Makoto Furukawa", "古川慎"],
+  ["Masakazu Morita", "森田成一"],
+  ["Masaya Fukunishi", "福西勝也"],
+  ["Megumi Toyoguchi", "豊口めぐみ"],
+  ["Miho Okasaki", "岡咲美保"],
+  ["Natsuki Hanae", "花江夏樹"],
+  ["Rena Motomura", "本村玲奈"],
+  ["Rie Takahashi", "高橋李依"],
+  ["Saori Hayami", "早見沙織"],
+  ["Setsu Ito", "伊藤節生"],
+  ["Takahiro Sakurai", "櫻井孝宏"],
+  ["Yoshino Aoyama", "青山吉能"],
+  ["Yuki Shin", "新祐樹"],
+  ["Yume Miyamoto", "宮本侑芽"],
+  ["Yuu Hayashi", "林勇"],
+]);
+
+const inferredVoiceActorsByEvent = new Map([
+  ["JUJUTSU KAISEN: Celebrating 5 Years of Curses with Cast Hosted by TOHO animation", [
+    "Takahiro Sakurai",
+    "Koki Uchiyama",
+    "Yuu Hayashi",
+    "Anna Nagase",
+  ]],
+  ["MARRIAGETOXIN Road to the Best Marriage! at Anime Expo", [
+    "Anna Nagase",
+  ]],
 ]);
 
 const venueOrder = [
@@ -153,9 +197,15 @@ function isCompactLayout() {
   return window.innerWidth <= 900;
 }
 
+function inferredGuestSearchText(event) {
+  return (inferredVoiceActorsByEvent.get(event.title) || [])
+    .map((name) => `${name} ${japaneseVoiceActors.get(name) || ""}`)
+    .join(" ");
+}
+
 function eventMatches(event) {
   const query = state.query.trim().toLowerCase();
-  const text = `${event.title} ${event.room} ${event.description} ${event.clearing}`.toLowerCase();
+  const text = `${event.title} ${event.room} ${event.description} ${event.clearing} ${inferredGuestSearchText(event)}`.toLowerCase();
   const hasQuery = !query || text.includes(query);
   const hasTags = !state.tags.size || [...state.tags].every((tag) => event.tags.some((item) => item.id === tag));
   const hasMark = !state.markOnly || state.marked.has(event.id);
@@ -301,6 +351,19 @@ function renderSummary(dayEvents, filteredEvents, rooms) {
 
 function eventTags(event) {
   return new Set(event.tags.map((tag) => tag.id));
+}
+
+function inferredGuestInfo(event) {
+  const text = `${event.title} ${event.description}`;
+  const inferred = (inferredVoiceActorsByEvent.get(event.title) || [])
+    .filter((name) => !text.includes(name));
+  if (!inferred.length) return "";
+
+  const content = inferred.map((name) => {
+    const japanese = japaneseVoiceActors.get(name);
+    return `<span>${escapeHtml(name)}${japanese ? `<span class="name-jp">（${escapeHtml(japanese)}）</span>` : ""}</span>`;
+  }).join("");
+  return `<div class="inferred-guests"><strong>推测嘉宾</strong>${content}</div>`;
 }
 
 function eventBadges(event) {
@@ -455,6 +518,7 @@ function showEvent(id) {
       ${eventBadges(event)}
     </div>
     <p class="dialog-description">${annotateJapaneseGuestNames(event.description)}</p>
+    ${inferredGuestInfo(event)}
   `;
   dialog.showModal();
 }
