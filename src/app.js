@@ -28,6 +28,7 @@ const japaneseGuestNames = new Map([
   ["Daisuke Hirose", "広瀬大介"],
   ["Gakuto Kajiwara", "梶原岳人"],
   ["Hana Hishikawa", "菱川花菜"],
+  ["Haruki Ishiya", "石谷春貴"],
   ["Kamome Shirahama", "白浜鴎"],
   ["Kana Ueda", "植田佳奈"],
   ["Kensho Ono", "小野賢章"],
@@ -93,6 +94,7 @@ const japaneseVoiceActors = new Map([
   ["Daisuke Hirose", "広瀬大介"],
   ["Gakuto Kajiwara", "梶原岳人"],
   ["Hana Hishikawa", "菱川花菜"],
+  ["Haruki Ishiya", "石谷春貴"],
   ["Kana Ueda", "植田佳奈"],
   ["Kensho Ono", "小野賢章"],
   ["Kikunosuke Toya", "戸谷菊之介"],
@@ -108,6 +110,7 @@ const japaneseVoiceActors = new Map([
   ["Rie Takahashi", "高橋李依"],
   ["Sally Amaki", "天城サリー"],
   ["Saori Hayami", "早見沙織"],
+  ["Shion Wakayama", "若山詩音"],
   ["Setsu Ito", "伊藤節生"],
   ["Takahiro Sakurai", "櫻井孝宏"],
   ["Yoshino Aoyama", "青山吉能"],
@@ -124,7 +127,8 @@ const inferredVoiceActorsByEvent = new Map([
     "Anna Nagase",
   ]],
   ["MARRIAGETOXIN Road to the Best Marriage! at Anime Expo", [
-    "Anna Nagase",
+    "Haruki Ishiya",
+    "Shion Wakayama",
   ]],
   ["NEEDY GIRL OVERDOSE IRL Event", [
     "Sally Amaki",
