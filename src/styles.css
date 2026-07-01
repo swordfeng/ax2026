@@ -555,15 +555,132 @@ dialog::backdrop {
   padding: 2px 5px;
 }
 
+.agenda-meta-button {
+  min-height: 0;
+  border-radius: 6px;
+  padding: 2px 7px;
+  border-color: #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.2;
+  box-shadow: 0 1px 0 rgba(31, 35, 40, 0.05);
+}
+
+.agenda-meta-button:focus,
+.agenda-meta-button:hover {
+  border-color: var(--game);
+  background: #ecfdf5;
+  color: var(--ink);
+}
+
+.agenda-card-meta .agenda-room {
+  border-color: rgba(15, 118, 110, 0.32);
+  background: #f0fdfa;
+  color: var(--game);
+}
+
+.agenda-card-meta .agenda-room:focus,
+.agenda-card-meta .agenda-room:hover {
+  border-color: var(--game);
+  background: #ccfbf1;
+}
+
 .agenda-card-meta .agenda-conflict {
+  border-color: rgba(163, 21, 58, 0.28);
   background: #fff1f2;
   color: #a3153a;
+}
+
+.agenda-card-meta .agenda-conflict:focus,
+.agenda-card-meta .agenda-conflict:hover {
+  border-color: #a3153a;
+  background: #ffe4e6;
 }
 
 .empty-state {
   padding: 18px;
   color: var(--muted);
   font-weight: 750;
+}
+
+.context-back {
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 0 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.context-list,
+.context-anchor {
+  display: grid;
+  gap: 8px;
+}
+
+.context-anchor {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.mini-event {
+  display: grid;
+  width: 100%;
+  min-height: 0;
+  grid-template-columns: auto 1fr;
+  gap: 4px 8px;
+  border-left: 5px solid var(--accent-2);
+  padding: 8px;
+  text-align: left;
+}
+
+.mini-event.tone-live {
+  border-left-color: var(--accent);
+}
+
+.mini-event.tone-jp_va {
+  border-left-color: var(--voice);
+}
+
+.mini-event.tone-premiere {
+  border-left-color: var(--accent-3);
+}
+
+.mini-event.tone-game,
+.mini-event.tone-default {
+  border-left-color: var(--game);
+}
+
+.mini-event.tone-weak {
+  border-left-color: var(--weak);
+}
+
+.mini-time,
+.mini-room {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.mini-title {
+  grid-column: 1 / -1;
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.mini-badges {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.current-context .mini-event {
+  border-color: #f59e0b;
+  background: #fffbeb;
 }
 
 @media (max-width: 760px) {

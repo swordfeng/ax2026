@@ -261,9 +261,11 @@ function renderControls() {
 }
 
 function renderRoomSwitcher(rooms, selectedRoom) {
-  if (!isCompactLayout() || !rooms.length) {
-    roomSwitcher.hidden = true;
-    roomSwitcher.innerHTML = "";
+  if (!roomSwitcher || !isCompactLayout() || !rooms.length) {
+    if (roomSwitcher) {
+      roomSwitcher.hidden = true;
+      roomSwitcher.innerHTML = "";
+    }
     return;
   }
 
@@ -297,6 +299,10 @@ function renderSummary(dayEvents, filteredEvents, rooms) {
   ].map((item) => `<span>${escapeHtml(item)}</span>`).join("");
 }
 
+function eventTags(event) {
+  return new Set(event.tags.map((tag) => tag.id));
+}
+
 function eventBadges(event) {
   const badges = [];
   if (event.clearing) {
@@ -307,7 +313,7 @@ function eventBadges(event) {
 }
 
 function eventColorClass(event) {
-  const tagIds = new Set(event.tags.map((tag) => tag.id));
+  const tagIds = eventTags(event);
   const primary = colorPriority.find((id) => tagIds.has(id));
   return primary ? `tone-${primary}` : "tone-default";
 }
@@ -351,8 +357,8 @@ function renderCompactAgenda(dayEvents, filteredEvents, rooms) {
           ${markButton(event.id, true)}
           <div class="agenda-card-meta">
             <span>${escapeHtml(timeText)}</span>
-            <span>${escapeHtml(event.room)}</span>
-            ${conflictCount ? `<span class="agenda-conflict">冲突 ${conflictCount}</span>` : ""}
+            <button type="button" class="agenda-meta-button agenda-room" data-room-context="${escapeHtml(event.id)}" aria-label="查看 ${escapeHtml(event.room)} 前后活动">⌖ ${escapeHtml(event.room)}</button>
+            ${conflictCount ? `<button type="button" class="agenda-meta-button agenda-conflict" data-conflict-context="${escapeHtml(event.id)}" aria-label="查看 ${conflictCount} 个冲突活动">冲突 ${conflictCount}</button>` : ""}
           </div>
           <div class="event-title">${highlightWorkTitles(event.title, event.workTitles || (event.workTitle ? [event.workTitle] : []))}</div>
           <div class="badges">${eventBadges(event)}</div>
@@ -453,6 +459,69 @@ function showEvent(id) {
   dialog.showModal();
 }
 
+function miniEventButton(event) {
+  const timeText = `${eventTimeLabel(event.start, event.startDayOffset)} - ${eventTimeLabel(event.end, event.endDayOffset)}`;
+  return `
+    <button type="button" class="mini-event ${eventColorClass(event)}" data-open-event="${escapeHtml(event.id)}">
+      <span class="mini-time">${escapeHtml(timeText)}</span>
+      <span class="mini-room">${escapeHtml(event.room)}</span>
+      <span class="mini-title">${highlightWorkTitles(event.title, event.workTitles || (event.workTitle ? [event.workTitle] : []))}</span>
+      <span class="mini-badges">${eventBadges(event)}</span>
+    </button>`;
+}
+
+function showRoomContext(id) {
+  const event = events.find((item) => item.id === id);
+  if (!event) return;
+  const sameRoom = events
+    .filter((item) => item.date === event.date && item.room === event.room)
+    .sort((a, b) => a.startMinutes - b.startMinutes || a.endMinutes - b.endMinutes);
+  const index = sameRoom.findIndex((item) => item.id === id);
+  const nearby = sameRoom.slice(Math.max(0, index - 2), index + 3);
+  dialogBody.innerHTML = `
+    <div class="dialog-heading">
+      <h2 class="dialog-title">${escapeHtml(event.room)}</h2>
+      <button type="button" class="context-back" data-open-event="${escapeHtml(event.id)}">返回活动</button>
+    </div>
+    <div class="dialog-meta">
+      <span class="badge">${escapeHtml(event.date)}</span>
+      <span class="badge">${escapeHtml(eventTimeLabel(event.start, event.startDayOffset))} 附近</span>
+    </div>
+    <div class="context-list">
+      ${nearby.map((item) => `<div class="${item.id === event.id ? "current-context" : ""}">${miniEventButton(item)}</div>`).join("")}
+    </div>
+  `;
+  dialog.showModal();
+}
+
+function showConflictContext(id) {
+  const event = events.find((item) => item.id === id);
+  if (!event) return;
+  const visibleEvents = events.filter(eventMatches);
+  const conflicts = visibleEvents
+    .filter((item) => item.id !== event.id
+      && item.startMinutes < event.endMinutes
+      && item.endMinutes > event.startMinutes)
+    .sort((a, b) => a.startMinutes - b.startMinutes || a.endMinutes - b.endMinutes || compareRooms(a.room, b.room));
+  const timeText = `${eventTimeLabel(event.start, event.startDayOffset)} - ${eventTimeLabel(event.end, event.endDayOffset)}`;
+  dialogBody.innerHTML = `
+    <div class="dialog-heading">
+      <h2 class="dialog-title">冲突活动</h2>
+      <button type="button" class="context-back" data-open-event="${escapeHtml(event.id)}">返回活动</button>
+    </div>
+    <div class="dialog-meta">
+      <span class="badge">${escapeHtml(timeText)}</span>
+      <span class="badge">${escapeHtml(event.room)}</span>
+      <span class="badge">${conflicts.length} 个冲突</span>
+    </div>
+    <div class="context-anchor">${miniEventButton(event)}</div>
+    <div class="context-list">
+      ${conflicts.map(miniEventButton).join("") || `<div class="empty-state">没有重叠活动</div>`}
+    </div>
+  `;
+  dialog.showModal();
+}
+
 dayTabs.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-day]");
   if (!button) return;
@@ -475,6 +544,7 @@ tagFilters.addEventListener("click", (event) => {
   renderTimeline();
 });
 
+if (roomSwitcher) {
 roomSwitcher.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-room-shift]");
   if (!button) return;
@@ -497,6 +567,7 @@ roomSwitcher.addEventListener("change", (event) => {
   state.room = select.value;
   renderTimeline();
 });
+}
 
 searchInput.addEventListener("input", () => {
   state.query = searchInput.value;
@@ -508,6 +579,16 @@ timeline.addEventListener("click", (event) => {
   if (mark) {
     toggleMarked(mark.dataset.markToggle);
     renderTimeline();
+    return;
+  }
+  const roomContext = event.target.closest("[data-room-context]");
+  if (roomContext) {
+    showRoomContext(roomContext.dataset.roomContext);
+    return;
+  }
+  const conflictContext = event.target.closest("[data-conflict-context]");
+  if (conflictContext) {
+    showConflictContext(conflictContext.dataset.conflictContext);
     return;
   }
   const button = event.target.closest(".event-card, .agenda-card");
@@ -525,10 +606,15 @@ timeline.addEventListener("keydown", (event) => {
 
 dialogBody.addEventListener("click", (event) => {
   const mark = event.target.closest(".mark-toggle");
-  if (!mark) return;
-  toggleMarked(mark.dataset.markToggle);
-  renderTimeline();
-  showEvent(mark.dataset.markToggle);
+  if (mark) {
+    toggleMarked(mark.dataset.markToggle);
+    renderTimeline();
+    showEvent(mark.dataset.markToggle);
+    return;
+  }
+  const openEvent = event.target.closest("[data-open-event]");
+  if (!openEvent) return;
+  showEvent(openEvent.dataset.openEvent);
 });
 
 closeDialog.addEventListener("click", () => {
