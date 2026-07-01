@@ -6,6 +6,7 @@ const state = {
   marked: new Set(loadMarkedIds()),
   markOnly: false,
   dialogEventId: "",
+  room: "",
 };
 
 const tagLabels = [
@@ -17,6 +18,7 @@ const tagLabels = [
 ];
 
 const colorPriority = ["live", "jp_va", "premiere", "game", "weak"];
+const allRoomsValue = "__all__";
 const japaneseGuestNames = new Map([
   ["Acky Bright", "アッキー・ブライト"],
   ["Aoi Ichikawa", "市川蒼"],
@@ -110,6 +112,7 @@ const venueRank = new Map(venueOrder.map((room, index) => [room, index]));
 const dayTabs = document.querySelector("#dayTabs");
 const tagFilters = document.querySelector("#tagFilters");
 const searchInput = document.querySelector("#searchInput");
+const roomSwitcher = document.querySelector("#roomSwitcher");
 const summary = document.querySelector("#summary");
 const timeline = document.querySelector("#timeline");
 const dialog = document.querySelector("#eventDialog");
@@ -144,6 +147,10 @@ function escapeHtml(value) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+function isCompactLayout() {
+  return window.innerWidth <= 900;
 }
 
 function eventMatches(event) {
@@ -253,6 +260,30 @@ function renderControls() {
   ].join("");
 }
 
+function renderRoomSwitcher(rooms, selectedRoom) {
+  if (!isCompactLayout() || !rooms.length) {
+    roomSwitcher.hidden = true;
+    roomSwitcher.innerHTML = "";
+    return;
+  }
+
+  roomSwitcher.hidden = false;
+  const options = [
+    [allRoomsValue, "全部地点"],
+    ...rooms.map((room) => [room, room]),
+  ];
+  roomSwitcher.innerHTML = `
+    <button type="button" class="room-nav" data-room-shift="-1" aria-label="上一个地点">←</button>
+    <label class="room-picker">
+      <span>地点</span>
+      <select id="roomSelect">
+        ${options.map(([value, label]) => `<option value="${escapeHtml(value)}"${value === selectedRoom ? " selected" : ""}>${escapeHtml(label)}</option>`).join("")}
+      </select>
+    </label>
+    <button type="button" class="room-nav" data-room-shift="1" aria-label="下一个地点">→</button>
+  `;
+}
+
 function renderSummary(dayEvents, filteredEvents, rooms) {
   const clearingCount = filteredEvents.filter((event) => event.clearing).length;
   const markedCount = dayEvents.filter((event) => state.marked.has(event.id)).length;
@@ -287,13 +318,77 @@ function compareRooms(a, b) {
   return rankA - rankB || a.localeCompare(b);
 }
 
+function renderCompactAgenda(dayEvents, filteredEvents, rooms) {
+  timeline.classList.add("agenda-mode");
+  timeline.style.removeProperty("--room-count");
+  timeline.style.removeProperty("--timeline-height");
+  const sortedEvents = [...filteredEvents]
+    .filter((event) => Number.isFinite(event.startMinutes) && Number.isFinite(event.endMinutes))
+    .sort((a, b) => a.startMinutes - b.startMinutes || a.endMinutes - b.endMinutes || compareRooms(a.room, b.room));
+  const conflictCounts = new Map(sortedEvents.map((event) => [
+    event.id,
+    sortedEvents.filter((other) => other.id !== event.id && other.startMinutes < event.endMinutes && other.endMinutes > event.startMinutes).length,
+  ]));
+  const groups = [];
+  for (const event of sortedEvents) {
+    const group = groups[groups.length - 1];
+    if (!group || group.startMinutes !== event.startMinutes) {
+      groups.push({ startMinutes: event.startMinutes, events: [event] });
+    } else {
+      group.events.push(event);
+    }
+  }
+
+  timeline.innerHTML = groups.map((group) => {
+    const simultaneous = group.events.length > 1;
+    const groupLabel = minuteLabel(group.startMinutes);
+    const cards = group.events.map((event) => {
+      const classTags = eventColorClass(event);
+      const timeText = `${eventTimeLabel(event.start, event.startDayOffset)} - ${eventTimeLabel(event.end, event.endDayOffset)}`;
+      const conflictCount = conflictCounts.get(event.id) || 0;
+      return `
+        <div class="agenda-card ${classTags}" data-id="${event.id}" role="button" tabindex="0" aria-label="${escapeHtml(timeText)} ${escapeHtml(event.room)} ${escapeHtml(event.title)}">
+          ${markButton(event.id, true)}
+          <div class="agenda-card-meta">
+            <span>${escapeHtml(timeText)}</span>
+            <span>${escapeHtml(event.room)}</span>
+            ${conflictCount ? `<span class="agenda-conflict">冲突 ${conflictCount}</span>` : ""}
+          </div>
+          <div class="event-title">${highlightWorkTitles(event.title, event.workTitles || (event.workTitle ? [event.workTitle] : []))}</div>
+          <div class="badges">${eventBadges(event)}</div>
+        </div>`;
+    }).join("");
+    return `
+      <section class="agenda-group${simultaneous ? " has-conflict" : ""}">
+        <div class="agenda-group-header">
+          <span>${escapeHtml(groupLabel)}</span>
+          ${simultaneous ? `<strong>${group.events.length} 个同时开始</strong>` : ""}
+        </div>
+        <div class="agenda-group-events">${cards}</div>
+      </section>`;
+  }).join("") || `<div class="empty-state">没有符合条件的活动</div>`;
+  renderSummary(dayEvents, filteredEvents, rooms);
+}
+
 function renderTimeline() {
   renderControls();
+  timeline.classList.remove("agenda-mode");
   const dayEvents = events.filter((event) => event.date === state.day);
   const filteredEvents = events.filter(eventMatches);
   const rooms = [...new Set(dayEvents.map((event) => event.room))].sort(compareRooms);
   const visibleRooms = rooms.filter((room) => filteredEvents.some((event) => event.room === room));
-  const columns = visibleRooms.length ? visibleRooms : rooms;
+  const switcherRooms = visibleRooms.length ? visibleRooms : rooms;
+  if (isCompactLayout()) {
+    if (!state.room || (state.room !== allRoomsValue && !switcherRooms.includes(state.room))) {
+      state.room = allRoomsValue;
+    }
+  }
+  renderRoomSwitcher(switcherRooms, state.room);
+  if (isCompactLayout() && state.room === allRoomsValue) {
+    renderCompactAgenda(dayEvents, filteredEvents, switcherRooms);
+    return;
+  }
+  const columns = isCompactLayout() ? (state.room ? [state.room] : []) : (visibleRooms.length ? visibleRooms : rooms);
   const startMinute = Math.min(...dayEvents.map((event) => event.startMinutes).filter(Number.isFinite));
   const endMinute = Math.max(...dayEvents.map((event) => event.endMinutes).filter(Number.isFinite));
   const timelineStart = Math.floor(startMinute / 60) * 60;
@@ -380,6 +475,29 @@ tagFilters.addEventListener("click", (event) => {
   renderTimeline();
 });
 
+roomSwitcher.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-room-shift]");
+  if (!button) return;
+  const dayEvents = events.filter((item) => item.date === state.day);
+  const filteredEvents = events.filter(eventMatches);
+  const rooms = [...new Set(dayEvents.map((item) => item.room))].sort(compareRooms);
+  const switcherRooms = rooms.filter((room) => filteredEvents.some((item) => item.room === room));
+  const usableRooms = [allRoomsValue, ...(switcherRooms.length ? switcherRooms : rooms)];
+  if (!usableRooms.length) return;
+  const index = Math.max(0, usableRooms.indexOf(state.room));
+  const delta = Number(button.dataset.roomShift) || 0;
+  const nextIndex = (index + delta + usableRooms.length) % usableRooms.length;
+  state.room = usableRooms[nextIndex];
+  renderTimeline();
+});
+
+roomSwitcher.addEventListener("change", (event) => {
+  const select = event.target.closest("#roomSelect");
+  if (!select) return;
+  state.room = select.value;
+  renderTimeline();
+});
+
 searchInput.addEventListener("input", () => {
   state.query = searchInput.value;
   renderTimeline();
@@ -392,14 +510,14 @@ timeline.addEventListener("click", (event) => {
     renderTimeline();
     return;
   }
-  const button = event.target.closest(".event-card");
+  const button = event.target.closest(".event-card, .agenda-card");
   if (!button) return;
   showEvent(button.dataset.id);
 });
 
 timeline.addEventListener("keydown", (event) => {
   if (event.key !== "Enter" && event.key !== " ") return;
-  const card = event.target.closest(".event-card");
+  const card = event.target.closest(".event-card, .agenda-card");
   if (!card) return;
   event.preventDefault();
   showEvent(card.dataset.id);
@@ -419,5 +537,8 @@ closeDialog.addEventListener("click", () => {
 });
 dialog.addEventListener("close", () => {
   state.dialogEventId = "";
+});
+window.addEventListener("resize", () => {
+  renderTimeline();
 });
 renderTimeline();
